@@ -21,6 +21,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
 /**
@@ -69,6 +74,22 @@ public class BeerController {
       }
     }
     
-
+    @DeleteMapping(value= "beers/Delete/{id}", produces = MediaTypes.HAL_JSON_VALUE)
+    public ResponseEntity delete(@PathVariable long id) {
+        beerService.deleteByID(id);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+    
+    @PostMapping(value= "/beers/Add/", consumes={MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity add(@RequestBody Beer b) {
+        beerService.saveBeer(b);
+        return new ResponseEntity(HttpStatus.CREATED);
+    }
+    
+    @PutMapping(value= "/beers/Put/", consumes={MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity edit(@RequestBody Beer b) { //the edit method should check if the Author object is already in the DB before attempting to save it.
+         beerService.saveBeer(b);
+        return new ResponseEntity(HttpStatus.OK);
+    }
     
 }
