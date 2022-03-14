@@ -17,9 +17,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import org.springframework.hateoas.RepresentationModel;
+
 
 @Getter
 @Setter
@@ -27,7 +28,7 @@ import javax.persistence.Lob;
 @AllArgsConstructor
 @ToString
 @Entity
-public class Beer implements Serializable {
+public class Beer extends RepresentationModel<Beer>{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

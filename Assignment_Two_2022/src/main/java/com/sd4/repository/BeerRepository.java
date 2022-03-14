@@ -15,6 +15,6 @@ import org.springframework.stereotype.Repository;
  * @author Mario
  */
 @Repository
-public interface BeerRepository extends PagingAndSortingRepository<Beer, Long>{
+public interface BeerRepository extends CrudRepository<Beer, Long>{
     
 }

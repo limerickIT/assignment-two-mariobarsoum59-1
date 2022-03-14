@@ -61,8 +61,5 @@ public class BeerService {
         return result;
     }
 
-    public Page<Beer> findPage(int pageNumber){
-    Pageable pageable = PageRequest.of(pageNumber - 1,125);
-    return beerRepo.findAll(pageable);
-}
+
 }
