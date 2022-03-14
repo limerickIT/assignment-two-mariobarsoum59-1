@@ -42,4 +42,21 @@ public class Breweries_GeocodeService {
     public void saveBook(Breweries_Geocode b) {
         breweries_GeocodeRepo.save(b);
     }
+    
+    public Optional<Breweries_Geocode> findbyBreweryId(Long id) {
+        
+        List<Breweries_Geocode> breweries = (List<Breweries_Geocode>) breweries_GeocodeRepo.findAll();
+        Optional<Breweries_Geocode> result=null;
+        
+        
+        for(Breweries_Geocode bg: breweries)
+        {
+            if(bg.getBrewery_id()==id)
+            {
+            result=Optional.of(bg);
+            }
+        }
+        
+        return result;
+    }
 }
