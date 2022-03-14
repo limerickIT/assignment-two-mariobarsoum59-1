@@ -62,7 +62,8 @@ public class BeerController {
       if (!o.isPresent()) 
            return new ResponseEntity(HttpStatus.NOT_FOUND);
         else {
-          Link selfLink = linkTo(methodOn(BeerController.class).getOne(id)).withSelfRel();
+          //Link selfLink = linkTo(methodOn(BeerController.class).getOne(id)).withSelfRel();
+          Link selfLink = Link.of("http://localhost:8888/beers/GetAll");
           o.get().add(selfLink);
           return ResponseEntity.ok(o.get());
       }
