@@ -6,6 +6,7 @@
 package com.sd4.controller;
 
 import com.sd4.model.Beer;
+import com.sd4.model.Brewery;
 import com.sd4.service.BeerService;
 import com.sd4.service.BreweryService;
 import com.sd4.service.CategoryService;
@@ -27,7 +28,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
 /**
  *
  * @author Mario
@@ -44,52 +44,67 @@ public class BeerController {
     @Autowired
     private BreweryService breweryService;
 
-    
-    
-    
-    @GetMapping(value="beers/GetAll", produces = MediaTypes.HAL_JSON_VALUE)
+    @GetMapping(value = "beers/GetAll", produces = MediaTypes.HAL_JSON_VALUE)
     public List<Beer> getAllBeers() {
         List<Beer> beersList = beerService.findAll();
-        
-        for(Beer b : beersList)
-        {
+
+        for (Beer b : beersList) {
             long beerId = b.getId();
             Link selfLink = linkTo(methodOn(BeerController.class).getOne(beerId)).withSelfRel();
             b.add(selfLink);
         }
-        
-       return beersList;
+
+        return beersList;
     }
-    
-    @GetMapping(value="beers/GetById/{id}", produces = MediaTypes.HAL_JSON_VALUE)
+
+    @GetMapping(value = "beers/GetById/{id}", produces = MediaTypes.HAL_JSON_VALUE)
     public ResponseEntity<Beer> getOne(@PathVariable long id) {
-      Optional<Beer> o =  beerService.findOne(id);
-      if (!o.isPresent()) 
-           return new ResponseEntity(HttpStatus.NOT_FOUND);
-        else {
-          //Link selfLink = linkTo(methodOn(BeerController.class).getOne(id)).withSelfRel();
-          Link selfLink = Link.of("http://localhost:8888/beers/GetAll");
-          o.get().add(selfLink);
-          return ResponseEntity.ok(o.get());
-      }
+        Optional<Beer> o = beerService.findOne(id);
+        if (!o.isPresent()) {
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        } else {
+            //Link selfLink = linkTo(methodOn(BeerController.class).getOne(id)).withSelfRel();
+            Link selfLink = Link.of("http://localhost:8888/beers/GetAll");
+            o.get().add(selfLink);
+
+            Link DetailsLink = Link.of("http://localhost:8888/beers/GetBeerDetailsId/" + id);
+            o.get().add(DetailsLink);
+
+            return ResponseEntity.ok(o.get());
+        }
     }
-    
-    @DeleteMapping(value= "beers/Delete/{id}", produces = MediaTypes.HAL_JSON_VALUE)
+
+    @GetMapping(value = "beers/GetBeerDetailsId/{id}", produces = MediaTypes.HAL_JSON_VALUE)
+    public String getBeerDetails(@PathVariable long id) {
+        Optional<Beer> o = beerService.findOne(id);
+        Optional<Brewery> b = breweryService.findOne(o.get().getBrewery_id());
+        String Details = "";
+        if (!o.isPresent()) {
+            Details = "CANNOT FIND BEER DETAILS";
+        } else {
+            Details = "Beer Name: " + o.get().getName() + ";Description: " + o.get().getDescription() + ";Brewery Name: " + b.get().getName();
+
+            return Details;
+        }
+        return Details;
+    }
+
+    @DeleteMapping(value = "beers/Delete/{id}", produces = MediaTypes.HAL_JSON_VALUE)
     public ResponseEntity delete(@PathVariable long id) {
         beerService.deleteByID(id);
         return new ResponseEntity(HttpStatus.OK);
     }
-    
-    @PostMapping(value= "/beers/Add/", consumes={MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
+
+    @PostMapping(value = "/beers/Add/", consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity add(@RequestBody Beer b) {
         beerService.saveBeer(b);
         return new ResponseEntity(HttpStatus.CREATED);
     }
-    
-    @PutMapping(value= "/beers/Put/", consumes={MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
+
+    @PutMapping(value = "/beers/Put/", consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity edit(@RequestBody Beer b) { //the edit method should check if the Author object is already in the DB before attempting to save it.
-         beerService.saveBeer(b);
+        beerService.saveBeer(b);
         return new ResponseEntity(HttpStatus.OK);
     }
-    
+
 }
