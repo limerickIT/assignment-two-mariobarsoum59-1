@@ -12,11 +12,18 @@ import com.sd4.service.BreweryService;
 import com.sd4.service.CategoryService;
 import com.sd4.service.StyleService;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Response;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -126,22 +133,63 @@ public class BeerController {
     @GetMapping(value = "/beers/GetImage/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
     public @ResponseBody
     byte[] getImage(@PathVariable long id, @RequestParam(name = "thumbnail", required = false) Boolean thumbnail) throws IOException {
-        
+
         Optional<Beer> o = beerService.findOne(id);
-        Resource resource=null;
-        
-        if(thumbnail==null || thumbnail==false)
-        {
-        resource = new ClassPathResource("static/assets/images/large/" + o.get().getImage());
+        Resource resource = null;
+
+        if (thumbnail == null || thumbnail == false) {
+            resource = new ClassPathResource("static/assets/images/large/" + o.get().getImage());
+        } else {
+            resource = new ClassPathResource("static/assets/images/thumbs/" + o.get().getImage());
         }
-        else
-        {
-        resource = new ClassPathResource("static/assets/images/thumbs/" + o.get().getImage());
-        }
-        
+
         System.out.println(thumbnail);
         InputStream input = resource.getInputStream();
         return IOUtils.toByteArray(input);
+    }
+
+    @GetMapping(value = "/beers/GetImagesZipFile", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public void getImagesZipFile() throws FileNotFoundException, IOException {
+        Resource resource = new ClassPathResource("static/assets/images/large/");
+        InputStream input = resource.getInputStream();
+        File fileToZip = resource.getFile();
+
+        FileOutputStream fos = new FileOutputStream("Compressed.zip");
+        ZipOutputStream zipOut = new ZipOutputStream(fos);
+
+        zipFile(fileToZip, fileToZip.getName(), zipOut);
+        zipOut.close();
+        fos.close();
+
+    }
+
+    private static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) throws IOException {
+        if (fileToZip.isHidden()) {
+            return;
+        }
+        if (fileToZip.isDirectory()) {
+            if (fileName.endsWith("/")) {
+                zipOut.putNextEntry(new ZipEntry(fileName));
+                zipOut.closeEntry();
+            } else {
+                zipOut.putNextEntry(new ZipEntry(fileName + "/"));
+                zipOut.closeEntry();
+            }
+            File[] children = fileToZip.listFiles();
+            for (File childFile : children) {
+                zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
+            }
+            return;
+        }
+        FileInputStream fis = new FileInputStream(fileToZip);
+        ZipEntry zipEntry = new ZipEntry(fileName);
+        zipOut.putNextEntry(zipEntry);
+        byte[] bytes = new byte[1024];
+        int length;
+        while ((length = fis.read(bytes)) >= 0) {
+            zipOut.write(bytes, 0, length);
+        }
+        fis.close();
     }
 
 }
