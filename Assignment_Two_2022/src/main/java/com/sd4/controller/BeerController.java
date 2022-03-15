@@ -5,12 +5,24 @@
  */
 package com.sd4.controller;
 
+import com.itextpdf.html2pdf.HtmlConverter;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.sd4.model.Beer;
 import com.sd4.model.Brewery;
+import com.sd4.model.Category;
+import com.sd4.model.Style;
 import com.sd4.service.BeerService;
 import com.sd4.service.BreweryService;
 import com.sd4.service.CategoryService;
 import com.sd4.service.StyleService;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,6 +39,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
@@ -190,6 +203,45 @@ public class BeerController {
             zipOut.write(bytes, 0, length);
         }
         fis.close();
+    }
+
+    @GetMapping(value = "beers/GetBeerPDF/{id}", produces =  {"application/json", "text/xml"})
+    public ResponseEntity<?> BeersPDF(@PathVariable long id) throws FileNotFoundException, DocumentException, IOException {
+
+        Optional<Beer> beer = beerService.findOne(id);
+
+        Optional<Brewery> brewery = breweryService.findOne((long) beer.get().getBrewery_id());
+
+        Optional<Category> category = categoryService.findOne((long) beer.get().getCat_id());
+
+        Optional<Style> style = styleService.findOne((long) beer.get().getStyle_id().longValue());
+
+        //Resource resource = new ClassPathResource("static/assets/images/large/"+beer.get().getImage());
+        //InputStream input = resource.getInputStream();
+        //File file = resource.getFile();
+        //System.out.println(file);
+        
+        
+    String output="<h1>"+beer.get().getName()+"</h1>"
+            + "<hr>"
+            + "<h3>ABV: </h3>"+ beer.get().getAbv()
+            + "<h3>Description: </h3>"+ beer.get().getDescription()
+            + "<h3>Sell Price: €"+ beer.get().getSell_price()+"</h3>"
+            + "<h3>Brewery Name: </h3>"+ brewery.get().getName()
+            + "<h3>Brewery Website: </h3>"+ brewery.get().getWebsite()
+            + "<h3>Beer category: </h3>"+ category.get().getCat_name()
+            + "<h3>Style Name: </h3>"+ style.get().getStyle_name()
+            + "<h3>Image: </h3>" 
+            + "<img src='/src/main/resources/static/assets/images/large/1.jpg'>";
+        
+
+    
+    ByteArrayOutputStream target = new ByteArrayOutputStream();
+    HtmlConverter.convertToPdf(output, target);
+        byte[] bytes = target.toByteArray();
+        
+        
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(bytes);
     }
 
 }

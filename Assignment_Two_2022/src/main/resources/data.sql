@@ -5838,6 +5838,7 @@ INSERT INTO beer (id, brewery_id, name, cat_id, style_id, abv, ibu, srm, descrip
 
 
 INSERT INTO style (id, cat_id, style_name, last_mod) VALUES
+(-1,1,'Not Set','2022-02-02 06:00:00'),
 (1, 1, 'Classic English-Style Pale Ale', '2019-03-07 06:19:39'),
 (2, 1, 'English-Style India Pale Ale', '2019-03-04 00:52:07'),
 (3, 1, 'Ordinary Bitter', '2019-03-06 00:09:01'),
