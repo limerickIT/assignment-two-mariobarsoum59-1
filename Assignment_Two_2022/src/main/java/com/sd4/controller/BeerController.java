@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  *
@@ -45,16 +46,24 @@ public class BeerController {
     private BreweryService breweryService;
 
     @GetMapping(value = "beers/GetAll", produces = MediaTypes.HAL_JSON_VALUE)
-    public List<Beer> getAllBeers() {
+    public List<Beer> getAllBeers(@RequestParam(name = "size", required = false) Integer size, @RequestParam(name = "offset", required = false) Integer offset) {
         List<Beer> beersList = beerService.findAll();
+        
+        if (size == null && offset == null) {
+            size = 50;
+            offset = 0;
+        }
 
-        for (Beer b : beersList) {
+        
+        List<Beer> paginatedList = beersList.subList(offset, offset + size);
+
+        for (Beer b : paginatedList) {
             long beerId = b.getId();
             Link selfLink = linkTo(methodOn(BeerController.class).getOne(beerId)).withSelfRel();
             b.add(selfLink);
         }
 
-        return beersList;
+        return paginatedList;
     }
 
     @GetMapping(value = "beers/GetById/{id}", produces = MediaTypes.HAL_JSON_VALUE)
