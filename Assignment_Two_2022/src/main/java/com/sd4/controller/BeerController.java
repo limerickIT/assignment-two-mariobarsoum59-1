@@ -11,9 +11,16 @@ import com.sd4.service.BeerService;
 import com.sd4.service.BreweryService;
 import com.sd4.service.CategoryService;
 import com.sd4.service.StyleService;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
@@ -28,6 +35,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  *
@@ -48,13 +56,12 @@ public class BeerController {
     @GetMapping(value = "beers/GetAll", produces = MediaTypes.HAL_JSON_VALUE)
     public List<Beer> getAllBeers(@RequestParam(name = "size", required = false) Integer size, @RequestParam(name = "offset", required = false) Integer offset) {
         List<Beer> beersList = beerService.findAll();
-        
+
         if (size == null && offset == null) {
             size = 50;
             offset = 0;
         }
 
-        
         List<Beer> paginatedList = beersList.subList(offset, offset + size);
 
         for (Beer b : paginatedList) {
@@ -114,6 +121,27 @@ public class BeerController {
     public ResponseEntity edit(@RequestBody Beer b) { //the edit method should check if the Author object is already in the DB before attempting to save it.
         beerService.saveBeer(b);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/beers/GetImage/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
+    public @ResponseBody
+    byte[] getImage(@PathVariable long id, @RequestParam(name = "thumbnail", required = false) Boolean thumbnail) throws IOException {
+        
+        Optional<Beer> o = beerService.findOne(id);
+        Resource resource=null;
+        
+        if(thumbnail==null || thumbnail==false)
+        {
+        resource = new ClassPathResource("static/assets/images/large/" + o.get().getImage());
+        }
+        else
+        {
+        resource = new ClassPathResource("static/assets/images/thumbs/" + o.get().getImage());
+        }
+        
+        System.out.println(thumbnail);
+        InputStream input = resource.getInputStream();
+        return IOUtils.toByteArray(input);
     }
 
 }
