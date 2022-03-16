@@ -49,11 +49,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -205,7 +207,7 @@ public class BeerController {
         fis.close();
     }
 
-    @GetMapping(value = "beers/GetBeerPDF/{id}", produces =  {"application/json", "text/xml"})
+    @GetMapping(value = "beers/GetBeerPDF/{id}", produces = {"application/json", "text/xml"})
     public ResponseEntity<?> BeersPDF(@PathVariable long id) throws FileNotFoundException, DocumentException, IOException {
 
         Optional<Beer> beer = beerService.findOne(id);
@@ -220,28 +222,24 @@ public class BeerController {
         //InputStream input = resource.getInputStream();
         //File file = resource.getFile();
         //System.out.println(file);
-        
-        
-    String output="<h1>"+beer.get().getName()+"</h1>"
-            + "<hr>"
-            + "<h3>ABV: </h3>"+ beer.get().getAbv()
-            + "<h3>Description: </h3>"+ beer.get().getDescription()
-            + "<h3>Sell Price: €"+ beer.get().getSell_price()+"</h3>"
-            + "<h3>Brewery Name: </h3>"+ brewery.get().getName()
-            + "<h3>Brewery Website: </h3>"+ brewery.get().getWebsite()
-            + "<h3>Beer category: </h3>"+ category.get().getCat_name()
-            + "<h3>Style Name: </h3>"+ style.get().getStyle_name()
-            + "<h3>Image: </h3>" 
-            + "<img src='/src/main/resources/static/assets/images/large/1.jpg'>";
-        
+        String output = "<h1>" + beer.get().getName() + "</h1>"
+                + "<hr>"
+                + "<h3>ABV: </h3>" + beer.get().getAbv()
+                + "<h3>Description: </h3>" + beer.get().getDescription()
+                + "<h3>Sell Price: €" + beer.get().getSell_price() + "</h3>"
+                + "<h3>Brewery Name: </h3>" + brewery.get().getName()
+                + "<h3>Brewery Website: </h3>" + brewery.get().getWebsite()
+                + "<h3>Beer category: </h3>" + category.get().getCat_name()
+                + "<h3>Style Name: </h3>" + style.get().getStyle_name()
+                + "<h3>Image: </h3>"
+                + "<img src='/src/main/resources/static/assets/images/large/1.jpg'>";
 
-    
-    ByteArrayOutputStream target = new ByteArrayOutputStream();
-    HtmlConverter.convertToPdf(output, target);
+        ByteArrayOutputStream target = new ByteArrayOutputStream();
+        HtmlConverter.convertToPdf(output, target);
         byte[] bytes = target.toByteArray();
-        
-        
+
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(bytes);
     }
+
 
 }

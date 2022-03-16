@@ -38,7 +38,7 @@ public class BreweriesGeoCodeController {
     private Breweries_GeocodeService breweryGeocodeService;    
     
     
-   @GetMapping(value = "Brewery/map/{id}", produces = MediaType.TEXT_HTML_VALUE)
+   @GetMapping(value = "brewery/map/{id}", produces = MediaType.TEXT_HTML_VALUE)
     public String getMap(@PathVariable("id") long id) {
         
         Optional<Brewery> brewery = breweryService.findOne(id);

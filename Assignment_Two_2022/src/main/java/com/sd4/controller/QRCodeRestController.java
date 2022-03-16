@@ -33,7 +33,7 @@ public class QRCodeRestController {
     @Autowired
     BreweryService service;
 
-    @GetMapping(value = "Brewery/QRCode/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
+    @GetMapping(value = "brewery/QRCode/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
     public byte[] getCode(@PathVariable("id") long id) throws WriterException, IOException {
 
         Optional<Brewery> brewery = service.findOne(id);
