@@ -23,7 +23,7 @@
 ## Get Brewery QRCode (When Scanned will try to add the VCard)
 * http://localhost:8888/brewery/QRCode/2
 
-## Get Beers PDF Brochoure (Try fixing image not showing up)
+## Get Beers PDF Brochoure
 * http://localhost:8888/beers/GetBeerPDF/1
 
 ## Get Images Zip file (Needs more work)
