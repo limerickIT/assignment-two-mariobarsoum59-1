@@ -28,3 +28,6 @@
 
 ## Get Images Zip file (Needs more work)
 * http://localhost:8888/beers/GetImagesZipFile
+
+## Load Swagger Documentation 
+* http://localhost:8888/swagger-ui/index.html
