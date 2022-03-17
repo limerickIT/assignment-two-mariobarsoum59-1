@@ -32,9 +32,11 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -54,6 +56,8 @@ import org.springframework.web.bind.annotation.RestController;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -137,7 +141,13 @@ public class BeerController {
     }
 
     @PostMapping(value = "/beers/Add/", consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity add(@RequestBody Beer b) {
+    public ResponseEntity add(@Valid @RequestBody Beer b, BindingResult result) {
+
+        if (result.hasErrors()) {
+            List<String> errors = result.getAllErrors().stream().map(e -> e.getDefaultMessage()).collect(Collectors.toList());
+            return new ResponseEntity<>(errors, HttpStatus.NOT_ACCEPTABLE);
+        }
+
         b.setId(0);
         b.setAdd_user(0);
         b.setLast_mod(new Date());
@@ -146,7 +156,12 @@ public class BeerController {
     }
 
     @PutMapping(value = "/beers/Put/", consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity edit(@RequestBody Beer b) {
+    public ResponseEntity edit(@Valid @RequestBody Beer b, BindingResult result) {
+
+        if (result.hasErrors()) {
+            List<String> errors = result.getAllErrors().stream().map(e -> e.getDefaultMessage()).collect(Collectors.toList());
+            return new ResponseEntity<>(errors, HttpStatus.NOT_ACCEPTABLE);
+        }
         b.setLast_mod(new Date());
         beerService.saveBeer(b);
         return new ResponseEntity(HttpStatus.OK);

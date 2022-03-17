@@ -19,6 +19,9 @@ import lombok.Setter;
 import lombok.ToString;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import org.springframework.hateoas.RepresentationModel;
 
 
@@ -34,11 +37,15 @@ public class Beer extends RepresentationModel<Beer>{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private long brewery_id;
+    @NotBlank(message="Beer name cannot be blank")
     private String name;
     private Integer cat_id;
     private Integer style_id;
+    @NotNull(message="ABV Cannot be null")
     private Double abv;
+    @NotNull(message="IBU Cannot be null")
     private Double ibu;
+    @NotNull(message="SRM Cannot be null")
     private Double srm;
     
     @Lob 
@@ -49,7 +56,11 @@ public class Beer extends RepresentationModel<Beer>{
     private Date last_mod;
 
     private String image;
+    @NotNull(message="Buy price cannot be null")
+    @DecimalMin(value="1.0", message="Buy price must be above 1.0")
     private Double buy_price;
+    @NotNull(message="Selling price cannot be null")
+    @DecimalMin(value="1.0", message="Selling price must be above 1.0")
     private Double sell_price;
 
 }
