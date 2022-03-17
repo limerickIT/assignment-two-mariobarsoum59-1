@@ -29,6 +29,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
@@ -137,12 +138,16 @@ public class BeerController {
 
     @PostMapping(value = "/beers/Add/", consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity add(@RequestBody Beer b) {
+        b.setId(0);
+        b.setAdd_user(0);
+        b.setLast_mod(new Date());
         beerService.saveBeer(b);
         return new ResponseEntity(HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/beers/Put/", consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity edit(@RequestBody Beer b) { //the edit method should check if the Author object is already in the DB before attempting to save it.
+    public ResponseEntity edit(@RequestBody Beer b) {
+        b.setLast_mod(new Date());
         beerService.saveBeer(b);
         return new ResponseEntity(HttpStatus.OK);
     }

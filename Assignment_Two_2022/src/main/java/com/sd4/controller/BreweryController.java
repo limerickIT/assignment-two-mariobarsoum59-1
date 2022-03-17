@@ -11,6 +11,7 @@ import com.sd4.service.BeerService;
 import com.sd4.service.BreweryService;
 import com.sd4.service.CategoryService;
 import com.sd4.service.StyleService;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,12 +74,14 @@ public class BreweryController {
 
     @PostMapping(value = "/brewery/Add/", consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity add(@RequestBody Brewery b) {
+        b.setLast_mod(new Date());
         breweryService.saveBrewery(b);
         return new ResponseEntity(HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/brewery/Put/", consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity edit(@RequestBody Brewery b) { //the edit method should check if the Author object is already in the DB before attempting to save it.
+        b.setLast_mod(new Date());
         breweryService.saveBrewery(b);
         return new ResponseEntity(HttpStatus.OK);
     }
