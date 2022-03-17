@@ -26,7 +26,7 @@
 ## Get Beers PDF Brochoure
 * http://localhost:8888/beers/GetBeerPDF/1
 
-## Get Images Zip file (Needs more work)
+## Get Images Zip file
 * http://localhost:8888/beers/GetImagesZipFile
 
 ## Load Swagger Documentation 
