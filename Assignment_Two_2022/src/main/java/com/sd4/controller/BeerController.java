@@ -37,8 +37,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.hibernate.engine.jdbc.StreamUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.hateoas.Link;
@@ -163,19 +165,21 @@ public class BeerController {
         return IOUtils.toByteArray(input);
     }
 
-    @GetMapping(value = "/beers/GetImagesZipFile", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void getImagesZipFile() throws FileNotFoundException, IOException {
-        Resource resource = new ClassPathResource("static/assets/images/large/");
+    @GetMapping(value = "/beers/GetImagesZipFile", produces = "application/zip")
+    public void zipDownload(HttpServletResponse response) throws IOException {
+        ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
+        Resource resource = new ClassPathResource("static/assets/images/");
         InputStream input = resource.getInputStream();
         File fileToZip = resource.getFile();
 
         FileOutputStream fos = new FileOutputStream("Compressed.zip");
-        ZipOutputStream zipOut = new ZipOutputStream(fos);
+        //ZipOutputStream zipOut = new ZipOutputStream(fos);
 
         zipFile(fileToZip, fileToZip.getName(), zipOut);
         zipOut.close();
         fos.close();
-
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.addHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"ImagesZip\"");
     }
 
     private static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) throws IOException {
@@ -217,29 +221,8 @@ public class BeerController {
         Optional<Category> category = categoryService.findOne((long) beer.get().getCat_id());
 
         Optional<Style> style = styleService.findOne((long) beer.get().getStyle_id().longValue());
-        
-        //Resource resource = new ClassPathResource("static/assets/images/large/"+beer.get().getImage());
-        //InputStream input = resource.getInputStream();
-        //File file = resource.getFile();
-        //System.out.println(file);
-//        String output = "<h1>" + beer.get().getName() + "</h1>"
-//                + "<hr>"
-//                + "<h3>ABV: </h3>" + beer.get().getAbv()
-//                + "<h3>Description: </h3>" + beer.get().getDescription()
-//                + "<h3>Sell Price: €" + beer.get().getSell_price() + "</h3>"
-//                + "<h3>Brewery Name: </h3>" + brewery.get().getName()
-//                + "<h3>Brewery Website: </h3>" + brewery.get().getWebsite()
-//                + "<h3>Beer category: </h3>" + category.get().getCat_name()
-//                + "<h3>Style Name: </h3>" + style.get().getStyle_name()
-//                + "<h3>Image: </h3>"
-//                + "<img src='/src/main/resources/static/assets/images/large/1.jpg'>";
-//        ByteArrayOutputStream target = new ByteArrayOutputStream();
-//        HtmlConverter.convertToPdf(output, target);
-//        byte[] bytes = target.toByteArray();
-//
-//        return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(bytes);
 
-        ByteArrayInputStream bis = GeneratePDFReport.Report(1,beer,brewery,category,style);
+        ByteArrayInputStream bis = GeneratePDFReport.Report(1, beer, brewery, category, style);
 
         var headers = new HttpHeaders();
         headers.add("Content-Disposition", "inline; filename=citiesreport.pdf");
@@ -251,5 +234,4 @@ public class BeerController {
                 .body(new InputStreamResource(bis));
 
     }
-
 }
